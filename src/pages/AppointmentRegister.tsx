@@ -12,10 +12,14 @@ import { useAppointmentStore } from "@/lib/store"
 import { toast } from "sonner"
 import { CalendarDays, CalendarClock, User, Mail, Phone, Scissors, FileText } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
+import { servicesValues } from "@/lib/types"
 
 const formSchema = z.object({
   clientName: z.string().min(2, {
     message: "El nombre debe tener al menos 2 caracteres.",
+  }),
+  dni: z.string().min(8, {
+    message: "El DNI debe tener al menos 8 dígitos.",
   }),
   email: z.string().email({
     message: "Ingrese un correo electrónico válido.",
@@ -40,6 +44,7 @@ export default function AppointmentRegister() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       clientName: "",
+      dni:"",
       email: "",
       phone: "",
       service: "",
@@ -52,9 +57,11 @@ export default function AppointmentRegister() {
     setIsSubmitting(true)
     
     try {
+      
       // Add client first
       const client = addClient({
         name: values.clientName,
+        dni: values.dni,
         email: values.email,
         phone: values.phone,
       })
@@ -87,17 +94,6 @@ export default function AppointmentRegister() {
     }
   }
   
-  const services = [
-    "Corte de cabello",
-    "Manicura",
-    "Pedicura",
-    "Tratamiento facial",
-    "Masaje",
-    "Depilación",
-    "Maquillaje",
-    "Otro"
-  ]
-
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-6">
@@ -129,6 +125,8 @@ export default function AppointmentRegister() {
                   <User className="h-4 w-4 text-primary" />
                   <h3 className="text-sm font-medium">Información del Cliente</h3>
                 </div>
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <FormField
                   control={form.control}
                   name="clientName"
@@ -146,6 +144,29 @@ export default function AppointmentRegister() {
                     </FormItem>
                   )}
                 />
+
+                  <FormField
+                    control={form.control}
+                    name="dni"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="flex items-center gap-1.5">
+                          <Phone className="h-3.5 w-3.5" />
+                          Dni
+                        </FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Ej. 38128526" 
+                            {...field} 
+                            className="transition-all focus-visible:ring-primary" 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+            
                 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <FormField
@@ -189,6 +210,8 @@ export default function AppointmentRegister() {
                       </FormItem>
                     )}
                   />
+
+                  
                 </div>
                 
                 <Separator className="my-2" />
@@ -214,7 +237,7 @@ export default function AppointmentRegister() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {services.map((service) => (
+                          {servicesValues.map((service) => (
                             <SelectItem 
                               key={service} 
                               value={service}

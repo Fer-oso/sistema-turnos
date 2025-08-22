@@ -40,6 +40,9 @@ const formSchema = z.object({
   name: z.string().min(2, {
     message: "El nombre debe tener al menos 2 caracteres.",
   }),
+  dni: z.string().min(2, {
+    message: "El DNI debe tener al menos 8 caracteres.",
+  }),
   email: z.string().email({
     message: "Ingrese un correo electrónico válido.",
   }),
@@ -58,6 +61,7 @@ export default function ClientsPage() {
   // Filter clients based on search query
   const filteredClients = clients.filter(client => 
     client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    client.dni.toLowerCase().includes(searchQuery.toLowerCase()) ||
     client.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
     client.phone.toLowerCase().includes(searchQuery.toLowerCase())
   ).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
@@ -72,6 +76,7 @@ export default function ClientsPage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
+      dni:"",
       email: "",
       phone: "",
     },
@@ -82,17 +87,25 @@ export default function ClientsPage() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
+      dni:"",
       email: "",
       phone: "",
     },
   })
   
   const handleAddClient = (values: z.infer<typeof formSchema>) => {
-    addClient({
+   const client = addClient({
       name: values.name,
+      dni: values.dni,
       email: values.email,
       phone: values.phone,
     })
+
+    if(!client){
+      toast.error("El cliente ya existe")
+      return
+    }
+
     setIsAddClientOpen(false)
     addForm.reset()
     toast.success("Cliente agregado correctamente")
@@ -102,6 +115,7 @@ export default function ClientsPage() {
     if (selectedClient) {
       updateClient(selectedClient.id, {
         name: values.name,
+        dni: values.dni,
         email: values.email,
         phone: values.phone,
       })
@@ -115,6 +129,7 @@ export default function ClientsPage() {
     setSelectedClient(client)
     editForm.reset({
       name: client.name,
+      dni: client.dni,
       email: client.email,
       phone: client.phone,
     })
@@ -160,6 +175,7 @@ export default function ClientsPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Nombre</TableHead>
+                    <TableHead>DNI</TableHead>
                     <TableHead>Correo Electrónico</TableHead>
                     <TableHead>Teléfono</TableHead>
                     <TableHead>Fecha de Registro</TableHead>
@@ -170,6 +186,7 @@ export default function ClientsPage() {
                   {filteredClients.map((client) => (
                     <TableRow key={client.id}>
                       <TableCell className="font-medium">{client.name}</TableCell>
+                      <TableCell>{client.dni}</TableCell>
                       <TableCell>{client.email}</TableCell>
                       <TableCell>{client.phone}</TableCell>
                       <TableCell>{new Date(client.createdAt).toLocaleDateString()}</TableCell>
@@ -232,6 +249,20 @@ export default function ClientsPage() {
                     <FormLabel>Nombre</FormLabel>
                     <FormControl>
                       <Input placeholder="Ej. Juan Pérez" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+<FormField
+                control={addForm.control}
+                name="dni"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Dni</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ej. 38128526" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

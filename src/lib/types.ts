@@ -1,8 +1,11 @@
 export type AppointmentStatus = 'en espera' | 'en servicio' | 'finalizado'
 
+export const servicesValues = ['Corte de cabello' , 'Manicura' , 'Pedicura' , 'Tratamiento facial' , 'Masaje' , 'Depilación' , 'Maquillaje',  'Otro']
+
 export interface Client {
   id: string
   name: string
+  dni: string
   email: string
   phone: string
   createdAt: Date
